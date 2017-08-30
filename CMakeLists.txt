@@ -15,5 +15,11 @@ set(OpenCV_COMPILER_FLAGS "-lopencv_stitching -lopencv_superres -lopencv_videost
     -lopencv_objdetect -lopencv_xphoto -lopencv_imgproc -lopencv_core")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenCV_COMPILER_FLAGS}")
-add_executable(razor main.cpp)
+
+file(GLOB SOURCES
+    include/*.hh
+    src/*.cc
+)
+
+add_executable(razor ${SOURCES})
 target_link_libraries( razor ${Open_CV_LIBS} )
