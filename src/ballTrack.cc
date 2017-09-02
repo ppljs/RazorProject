@@ -80,7 +80,7 @@ void BallTrack::detectBall() {
         double m10 = imgMoments.m10;
         double area = imgMoments.m00;
 
-        if(area > 100000.0) {
+        if(area > 100000.0 && area < 10E9) {
             int posX =  m10/area;
             int posY = m01/area;
 
