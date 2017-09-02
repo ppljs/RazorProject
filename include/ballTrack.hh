@@ -5,6 +5,19 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 
+
+/**
+ * @brief The BallTrack class
+ * Useful values of HUE are:
+ * Orange  0-22
+ * Yellow 22- 38
+ * Green 38-75
+ * Blue 75-130
+ * Violet 130-160
+ * Red 160-179
+ */
+
+
 class BallTrack {
 public:
     BallTrack();
