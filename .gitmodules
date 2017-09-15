@@ -1,0 +1,3 @@
+[submodule "Vision/RxCpp"]
+	path = Vision/RxCpp
+	url = git@github.com:Reactive-Extensions/RxCpp.git

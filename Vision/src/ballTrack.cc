@@ -96,4 +96,6 @@ void BallTrack::detectBall() {
         imgOriginal = imgOriginal + imgLines;
         imshow("Original", imgOriginal); //show the original image
     }
+    
+    
 }

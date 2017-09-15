@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.7)
 project(RazorProject)
 
 find_package( OpenCV REQUIRED )
-#include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 set(OpenCV_COMPILER_FLAGS "-lopencv_stitching -lopencv_superres -lopencv_videostab -lopencv_photo \
     -lopencv_aruco -lopencv_bgsegm -lopencv_bioinspired -lopencv_ccalib -lopencv_dpm -lopencv_face \
@@ -14,11 +13,15 @@ set(OpenCV_COMPILER_FLAGS "-lopencv_stitching -lopencv_superres -lopencv_videost
     -lopencv_highgui -lopencv_videoio -lopencv_flann -lopencv_xobjdetect -lopencv_imgcodecs \
     -lopencv_objdetect -lopencv_xphoto -lopencv_imgproc -lopencv_core")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenCV_COMPILER_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenCV_COMPILER_FLAGS} -lpthread")
 
 file(GLOB SOURCES
     include/*.hh
     src/*.cc
+)
+
+file(GLOB HEADERS
+    RxCpp/Rx/v2/src/rxcpp/*.hpp
 )
 
 add_executable(razor ${SOURCES})
