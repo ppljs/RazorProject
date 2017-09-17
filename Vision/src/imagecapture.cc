@@ -14,6 +14,7 @@ void ImageCaptureReader::readFromCam(cv::VideoCapture &cap) {
             std::cout << "Image coudn't be read\n";
             return;
         }
+        cv::imshow("In thread", img);
         emit imageReady(img);
     }
 }
@@ -67,6 +68,6 @@ cv::Mat ImageCapture::getHSVImage() {
 
 void ImageCapture::handleImage(const cv::Mat &img) {
     _rwlock.lockForWrite();
-    _img = img;
+    _img = img.clone();
     _rwlock.unlock();
 }
