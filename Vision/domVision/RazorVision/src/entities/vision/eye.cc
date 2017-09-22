@@ -1,24 +1,29 @@
-#include <include/entities/vision/eye.hh>
+#include <../include/entities/vision/eye.hh>
+#include <../include/constants/captureconsts.h>
+
 #include <math.h>
 
 #define MAX_NUM_OBJECTS 50
 #define MIN_OBJECT_AREA 600
 #define MAX_OBJECT_AREA 1000000
-#define FRAME_HEIGHT    480
-#define FRAME_WIDTH     640
 #define PI              3.1415
 
-Eye::Eye(long loopTime, int camIndex) {
+Eye::Eye(long loopTime, int camIndex, bool displayImgs) {
     _videoInput.open(camIndex);
     _loopTime = loopTime;
+    _displayImgs = displayImgs;
 
-    int yvec[6] = {0, 24, 81, 256, 115, 256};
-    int gvec[6] = {23, 65, 43, 256, 70, 256};
+    this->setTarget(IMAGE_CENTER_X, IMAGE_CENTER_Y, false);
+
+    int yvec[6] = {0, 0, 0, 0, 0, 0};
+    int gvec[6] = {0, 56, 189, 256, 0, 256};
+//    int yvec[6] = {0, 24, 81, 256, 115, 256};
+//    int gvec[6] = {23, 65, 43, 256, 70, 256};
     int rvec[6] = {0, 0, 0, 0, 0, 0};
 
-    _receptors[0] = new ColorReceptor("green", gvec);
-    _receptors[1] = new ColorReceptor("yellow", yvec);
-    _receptors[2] = new ColorReceptor("red", rvec);
+    _receptors[0] = new ColorReceptor("green", gvec, displayImgs);
+    _receptors[1] = new ColorReceptor("yellow", yvec, displayImgs);
+    _receptors[2] = new ColorReceptor("red", rvec, displayImgs);
 
     //set height and width of capture frame
     _videoInput.set(CV_CAP_PROP_FRAME_WIDTH, FRAME_WIDTH);
@@ -33,10 +38,11 @@ Eye::~Eye() {
 }
 
 
-void Eye::see() {
+void Eye::see(void) {
 
     int x = 0;
     int y = 0;
+    bool isKnown = false;
 
     while(true) {
         _videoInput.read(_rawImg);
@@ -49,20 +55,24 @@ void Eye::see() {
         _finalBinImg = _binImg1 + _binImg2 + _binImg3;
 
 
-        trackFilteredObject(x, y, _finalBinImg, _rawImg);
+        trackFilteredObject(x, y, isKnown, _finalBinImg, _rawImg);
 
-        cv::imshow("rawFeed", _rawImg);
-        cv::imshow("finalBinImg", _finalBinImg);
-        cv::imshow("binImg1", _binImg1);
-        cv::imshow("binImg2", _binImg2);
-        cv::imshow("binImg3", _binImg3);
+        this->setTarget(x, y, isKnown);
+
+        if(_displayImgs == true) {
+            cv::imshow("rawFeed", _rawImg);
+            cv::imshow("finalBinImg", _finalBinImg);
+            cv::imshow("binImg1", _binImg1);
+            cv::imshow("binImg2", _binImg2);
+            cv::imshow("binImg3", _binImg3);
+        }
 
         cv::waitKey(32);
     }
 
 }
 
-void Eye::trackFilteredObject(int &x, int &y, cv::Mat threshold, cv::Mat &cameraFeed){
+void Eye::trackFilteredObject(int& x, int& y, bool& isKnown, cv::Mat threshold, cv::Mat &cameraFeed){
 
     cv::Mat temp;
     threshold.copyTo(temp);
@@ -135,6 +145,8 @@ void Eye::trackFilteredObject(int &x, int &y, cv::Mat threshold, cv::Mat &camera
             }
         }
     }
+
+    isKnown = objectFound;
 }
 
 
@@ -165,11 +177,22 @@ void Eye::drawObject(int x, int y,cv::Mat &frame){
 
 }
 
-std::string Eye::intToString(int number){
-
-
+std::string Eye::intToString(int number) {
     std::stringstream ss;
     ss << number;
     return ss.str();
+}
+
+void Eye::setTarget(int x, int y, bool isknown) {
+    _targetMutex.lock();
+    _target.posX = x;
+    _target.posY = y;
+    _target.isKnown = isknown;
+    _targetMutex.unlock();
+}
+
+MyPoint Eye::getTarget() {
+    std::lock_guard<std::mutex> lock(_targetMutex);
+    return _target;
 }
 

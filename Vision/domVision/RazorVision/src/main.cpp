@@ -1,12 +1,41 @@
-#include <QCoreApplication>
-#include <entities/vision/eye.hh>
+#include <../include/entities/vision/eye.hh>
+#include <../include/entities/brain/brain.hh>
+#include <thread>
+
+#include <iostream>
+
+
+void runEye(Eye* eye) {
+    eye->see();
+}
+
+void runBrain(Brain* brain) {
+    brain->think();
+}
 
 int main(int argc, char *argv[]) {
-    QCoreApplication a(argc, argv);
 
-    Eye eye(10, 1);
+    int cam = 0;
+    bool displayImgs = false;
 
-    eye.see();
+    if(argc > 1) {
+        cam = std::stoi(argv[1]);
+    }
 
-    return a.exec();
+    if(argc > 2) {
+        displayImgs = (strncmp(argv[2], "true", 4)==0)? true : false;
+    }
+
+    Eye eye(10, cam, displayImgs);
+    Brain brain(&eye);
+
+    std::thread eyeThread(runEye, &eye);
+    std::thread brainThread(runBrain, &brain);
+
+    eyeThread.join();
+    brainThread.join();
+
+    return 0;
 }
+
+

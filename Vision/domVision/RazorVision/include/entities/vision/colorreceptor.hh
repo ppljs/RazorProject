@@ -1,21 +1,18 @@
 #ifndef COLORRECEPTOR_H
 #define COLORRECEPTOR_H
 
-#include <QtCore>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 
 class ColorReceptor {
 
 public:
-    ColorReceptor(char colorName[], int cvec[]);
-
-signals:
-
-public slots:
+    ColorReceptor(char colorName[], int cvec[], bool displayImgs);
     cv::Mat reception(cv::Mat hsv);
 
 private:
+    bool _displayImgs;
+
     // Internal variables
     int _H_MIN;
     int _H_MAX;
