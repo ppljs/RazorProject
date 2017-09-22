@@ -16,7 +16,7 @@ Eye::Eye(long loopTime, int camIndex, bool displayImgs) {
     this->setTarget(IMAGE_CENTER_X, IMAGE_CENTER_Y, false);
 
     int yvec[6] = {0, 0, 0, 0, 0, 0};
-    int gvec[6] = {0, 56, 189, 256, 0, 256};
+    int gvec[6] = {0, 52, 206, 256, 131, 256};
 //    int yvec[6] = {0, 24, 81, 256, 115, 256};
 //    int gvec[6] = {23, 65, 43, 256, 70, 256};
     int rvec[6] = {0, 0, 0, 0, 0, 0};

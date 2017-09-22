@@ -14,7 +14,7 @@ find_package( OpenCV REQUIRED )
 
 set(OpenCV_COMPILER_FLAGS "-lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_videoio -lopencv_imgproc")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenCV_COMPILER_FLAGS} -lpthread -lrt -lpigpio")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenCV_COMPILER_FLAGS} -lpthread -lrt")
 
 include_directories("${CMAKE_SOURCE_DIR}/include"
     "${CMAKE_SOURCE_DIR}/include/entities"
