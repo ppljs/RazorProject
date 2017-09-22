@@ -1,7 +1,16 @@
 #include <../include/entities/brain/cerebellum.hh>
 #include <../include/constants/captureconsts.h>
 
-#define MAX_POWER_ALLOWED 0.75
+#include <pigpio.h>
+
+#define MAX_POWER_ALLOWED 7500
+#define PWM_FREQ 1000
+
+#define PWM_RIGHT_MOTOR_FWR 12
+#define PWM_RIGHT_MOTOR_BCK 18
+
+#define PWM_LEFT_MOTOR_FWR 13
+#define PWM_LEFT_MOTOR_BCK 19
 
 Cerebellum::Cerebellum() {
 
@@ -19,7 +28,8 @@ void Cerebellum::runFoward(int powerPercentage) {
     }
 
     // duty cicle = powerPercentage * MAX_POWER_ALLOWED
-    //will be aplied to the 2 wheels
+    gpioHardwarePWM(PWM_RIGHT_MOTOR_FWR, PWM_FREQ, powerPercentage*MAX_POWER_ALLOWED);
+    gpioHardwarePWM(PWM_LEFT_MOTOR_FWR, PWM_FREQ, powerPercentage*MAX_POWER_ALLOWED);
 
 }
 
@@ -31,7 +41,13 @@ void Cerebellum::spin(int powerPercentage, bool turnClockWise) {
     }
 
     // duty cicle = powerPercentage * MAX_POWER_ALLOWED
-    //will be aplied to the 2 wheels but simetric
+    if(turnClockWise == true) {
+        gpioHardwarePWM(PWM_RIGHT_MOTOR_BCK, PWM_FREQ, powerPercentage*MAX_POWER_ALLOWED);
+        gpioHardwarePWM(PWM_LEFT_MOTOR_FWR, PWM_FREQ, powerPercentage*MAX_POWER_ALLOWED);
+    } else {
+        gpioHardwarePWM(PWM_RIGHT_MOTOR_FWR, PWM_FREQ, powerPercentage*MAX_POWER_ALLOWED);
+        gpioHardwarePWM(PWM_LEFT_MOTOR_BCK, PWM_FREQ, powerPercentage*MAX_POWER_ALLOWED);
+    }
 }
 
 void Cerebellum::goTo(const MyPoint &target) {
@@ -40,7 +56,6 @@ void Cerebellum::goTo(const MyPoint &target) {
     if((IMAGE_CENTER_X-target.posX) > 0) {
         //Turn right
         turnClockWise = true;
-
     } else {
         turnClockWise = false;
     }
