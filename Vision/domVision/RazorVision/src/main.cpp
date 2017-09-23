@@ -28,10 +28,12 @@ int main(int argc, char *argv[]) {
         displayImgs = (strncmp(argv[2], "true", 4)==0)? true : false;
     }
 
-//    gpioInitialise();
+    //gpioInitialise();
 
     Eye eye(10, cam, displayImgs);
     Brain brain(&eye);
+
+    eye.setBrain(&brain);
 
     std::thread eyeThread(runEye, &eye);
     std::thread brainThread(runBrain, &brain);

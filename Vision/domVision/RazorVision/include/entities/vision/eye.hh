@@ -13,6 +13,8 @@
 #include <../include/entities/vision/colorreceptor.hh>
 #include <../include/utils/mypoint.h>
 
+class Brain;
+
 class Eye {
 
 public:
@@ -23,9 +25,14 @@ public:
     void see(void);
 
     // Getters
-    MyPoint getTarget();
+    MyPoint* getTarget();
+
+    void setBrain(Brain* b);
 
 private:
+    Brain* _brain;
+    MyPoint _graphicalTarget;
+
     // Control variables
     int _loopTime;
     bool _displayImgs;
@@ -37,16 +44,13 @@ private:
     cv::Mat _finalBinImg;
     cv::Mat _binImg1;
     cv::Mat _binImg2;
-    cv::Mat _binImg3;
-    //these two vectors needed for output of findContours
-    std::vector< std::vector<cv::Point> > _contours;
-    std::vector<cv::Vec4i> _hierarchy;
+    cv::Mat _binImg3;    
 
     // Individual color catcher objects
-    ColorReceptor *_receptors[3];
+    ColorReceptor *_receptors[4];
 
     // Target matrix position
-    MyPoint _target;
+    MyPoint _target[4];
 
     // Mutex for accessing the target (Eye writes and Brain reads)
     std::mutex _targetMutex;
@@ -57,7 +61,9 @@ private:
     std::string intToString(int number);
 
     // Internal setter (To avoid setting the _target without mutex_lock)
-    void setTarget(int x, int y, bool isknown);
+    void setTarget(MyPoint targets[]);
+
+    void setTargetInit();
 
 };
 

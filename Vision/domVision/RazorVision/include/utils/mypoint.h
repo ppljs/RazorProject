@@ -5,6 +5,7 @@ typedef struct mypoint {
 
     int posX;
     int posY;
+    float area;
 
     bool isKnown;
 

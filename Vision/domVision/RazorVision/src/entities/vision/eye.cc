@@ -1,29 +1,29 @@
 #include <../include/entities/vision/eye.hh>
 #include <../include/constants/captureconsts.h>
+#include <../include/entities/brain/brain.hh>
 
 #include <math.h>
-
-#define MAX_NUM_OBJECTS 50
-#define MIN_OBJECT_AREA 300
-#define MAX_OBJECT_AREA 500000
-#define PI              3.1415
+#include <stdio.h>
+#include <time.h>
 
 Eye::Eye(long loopTime, int camIndex, bool displayImgs) {
     _videoInput.open(camIndex);
     _loopTime = loopTime;
     _displayImgs = displayImgs;
 
-    this->setTarget(IMAGE_CENTER_X, IMAGE_CENTER_Y, false);
+    _brain = NULL;
 
-    int yvec[6] = {0, 0, 0, 0, 0, 0};
-    int gvec[6] = {0, 52, 206, 256, 131, 256};
-//    int yvec[6] = {0, 24, 81, 256, 115, 256};
-//    int gvec[6] = {23, 65, 43, 256, 70, 256};
-    int rvec[6] = {0, 0, 0, 0, 0, 0};
+    this->setTargetInit();
 
-    _receptors[0] = new ColorReceptor("green", gvec, displayImgs);
-    _receptors[1] = new ColorReceptor("yellow", yvec, displayImgs);
-    _receptors[2] = new ColorReceptor("red", rvec, displayImgs);
+    int vec2[6] = {0, 8, 114, 256, 0, 256};
+    int vec1[6] = {9, 77, 145, 256, 113, 203};
+    int vec3[6] = {0, 0, 0, 0, 0, 0};
+    int vec4[6] = {0, 0, 0, 0, 0, 0};
+
+    _receptors[0] = new ColorReceptor("1", vec1, displayImgs, true);
+    _receptors[1] = new ColorReceptor("2", vec2, displayImgs, false);
+    _receptors[2] = new ColorReceptor("3", vec3, displayImgs, false);
+    _receptors[3] = new ColorReceptor("4", vec4, displayImgs, false);
 
     //set height and width of capture frame
     _videoInput.set(CV_CAP_PROP_FRAME_WIDTH, FRAME_WIDTH);
@@ -35,117 +35,56 @@ Eye::~Eye() {
     delete _receptors[0];
     delete _receptors[1];
     delete _receptors[2];
+    delete _receptors[3];
 }
 
 
 void Eye::see(void) {
 
-    int x = 0;
-    int y = 0;
+    MyPoint targets[4];
+
     bool isKnown = false;
 
+    clock_t start, end;
+
     while(true) {
-        _videoInput.read(_rawImg);
+
+        start = clock();
+
+        _videoInput.read(_rawImg);        
+
         cv::cvtColor(_rawImg, _hsv, cv::COLOR_BGR2HSV);
 
-        _binImg1 = _receptors[0]->reception(_hsv);
-        _binImg2 = _receptors[1]->reception(_hsv);
-        _binImg3 = _receptors[2]->reception(_hsv);
+        _binImg1 = _receptors[0]->reception(_hsv, targets[0].posX, targets[0].posY, targets[0].area, targets[0].isKnown, _rawImg);
+        _binImg2 = _receptors[1]->reception(_hsv, targets[1].posX, targets[1].posY, targets[1].area, targets[1].isKnown, _rawImg);
+        _binImg3 = _receptors[2]->reception(_hsv, targets[2].posX, targets[2].posY, targets[2].area, targets[2].isKnown, _rawImg);
+        _binImg3 = _receptors[3]->reception(_hsv, targets[3].posX, targets[3].posY, targets[3].area, targets[3].isKnown, _rawImg);
 
-        _finalBinImg = _binImg1 + _binImg2 + _binImg3;
+//        std::cout << "x = " << targets[0].posX << " || y = " << targets[0].posY << "\n\n";
+//        std::cout << "x = " << targets[1].posX << " || y = " << targets[1].posY << "\n\n";
+//        std::cout << "x = " << targets[2].posX << " || y = " << targets[2].posY << "\n\n";
+//        std::cout << "x = " << targets[3].posX << " || y = " << targets[3].posY << "\n\n";
 
-
-        trackFilteredObject(x, y, isKnown, _finalBinImg, _rawImg);
-
-        this->setTarget(x, y, isKnown);
+        this->setTarget(targets);
 
         if(_displayImgs == true) {
+
+            if(_brain != NULL) {
+                _graphicalTarget = _brain->getGraphicalTarget();                
+                this->drawObject(_graphicalTarget.posX, _graphicalTarget.posY, _rawImg);
+            }
+
             cv::imshow("rawFeed", _rawImg);
-            cv::imshow("finalBinImg", _finalBinImg);
             cv::imshow("binImg1", _binImg1);
             cv::imshow("binImg2", _binImg2);
             cv::imshow("binImg3", _binImg3);
             cv::waitKey(32);
         }
 
-       cv::waitKey(20);
+        end = clock();
+        std::cout << "f = " << 1/(((double)(end - start))/1000000) << "\n\n";
     }
 
-}
-
-void Eye::trackFilteredObject(int& x, int& y, bool& isKnown, cv::Mat& threshold, cv::Mat& cameraFeed){
-
-
-    //find contours of filtered image using openCV findContours function
-    cv::findContours(threshold, _contours,_hierarchy,CV_RETR_CCOMP,CV_CHAIN_APPROX_SIMPLE );
-    //use moments method to find our filtered object
-    double refArea = 0;
-    bool objectFound = false;
-
-
-    if (_hierarchy.size() > 0) {
-        cv::Moments moment;
-        int numObjects = _hierarchy.size();
-        //if number of objects greater than MAX_NUM_OBJECTS we have a noisy filter
-        if(numObjects<MAX_NUM_OBJECTS){
-            for (int index = 0; index >= 0; index = _hierarchy[index][0]) {
-
-                moment = cv::moments((cv::Mat)_contours[index]);
-                double area = moment.m00; 
-
-//                cv::Point extLeft  = *min_element(contours[index].begin(), contours[index].end(),
-//                                      [](const cv::Point& lhs, const cv::Point& rhs) {
-//                                          return lhs.x < rhs.x;
-//                                  });
-//                cv::Point extRight = *max_element(contours[index].begin(), contours[index].end(),
-//                                      [](const cv::Point& lhs, const cv::Point& rhs) {
-//                                          return lhs.x < rhs.x;
-//                                  });
-//                cv::Point extTop   = *min_element(contours[index].begin(), contours[index].end(),
-//                                      [](const cv::Point& lhs, const cv::Point& rhs) {
-//                                          return lhs.y < rhs.y;
-//                                  });
-//                cv::Point extBot   = *max_element(contours[index].begin(), contours[index].end(),
-//                                      [](const cv::Point& lhs, const cv::Point& rhs) {
-//                                          return lhs.y < rhs.y;
-//                                  });
-
-//                cv::minEnclosingCircle(contours[index], center, radius);
-//                std::cout << "Area = " << area << " || contourArea = " << PI*pow(radius, 2) << "\n\n";
-//                if((PI*pow(radius, 2)) > 1.2*area) {
-//                    continue;
-//                }
-
-                //if the area is less than 20 px by 20px then it is probably just noise
-                //if the area is the same as the 3/2 of the image size, probably just a bad filter
-                //we only want the object with the largest area so we safe a reference area each
-                //iteration and compare it to the area in the next iteration.
-                if(area>MIN_OBJECT_AREA && area<MAX_OBJECT_AREA && area>refArea){
-                    x = moment.m10/area;
-                    y = moment.m01/area;
-                    objectFound = true;
-                    refArea = area;
-                }/*else {
-
-                    objectFound = false;
-                    std::cout << "RUIM - index = " << index << "\n\n";
-                }*/
-            }
-            if(_displayImgs == true) {
-                //let user know you found an object
-                if(objectFound ==true){
-                    cv::putText(cameraFeed,"Tracking Object",cv::Point(0,50),2,1,cv::Scalar(0,255,0),2);
-                    //draw object location on screen
-                    drawObject(x,y,cameraFeed);
-
-                }else{
-                    cv::putText(cameraFeed,"TOO MUCH NOISE! ADJUST FILTER",cv::Point(0,50),1,2,cv::Scalar(0,0,255),2);
-                }
-            }
-        }
-    }
-
-    isKnown = objectFound;
 }
 
 
@@ -182,16 +121,35 @@ std::string Eye::intToString(int number) {
     return ss.str();
 }
 
-void Eye::setTarget(int x, int y, bool isknown) {
+void Eye::setTarget(MyPoint targets[]) {
     _targetMutex.lock();
-    _target.posX = x;
-    _target.posY = y;
-    _target.isKnown = isknown;
+    _target[0] = targets[0];
+    _target[1] = targets[1];
+    _target[2] = targets[2];
+    _target[3] = targets[3];
     _targetMutex.unlock();
 }
 
-MyPoint Eye::getTarget() {
+void Eye::setTargetInit() {
+    _targetMutex.lock();
+    _target[0].isKnown = false;
+    _target[1].isKnown = false;
+    _target[2].isKnown = false;
+    _target[3].isKnown = false;
+    _targetMutex.unlock();
+}
+
+MyPoint* Eye::getTarget() {
     std::lock_guard<std::mutex> lock(_targetMutex);
-    return _target;
+    MyPoint* ps = (MyPoint*)malloc(4*sizeof(MyPoint));
+    ps[0] = _target[0];
+    ps[1] = _target[1];
+    ps[2] = _target[2];
+    ps[3] = _target[3];
+    return ps;
+}
+
+void Eye::setBrain(Brain *b) {
+    _brain = b;
 }
 

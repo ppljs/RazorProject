@@ -79,6 +79,6 @@ void Cerebellum::goTo(const MyPoint &target) {
         turnClockWise = false;
     }
 
-    this->spin(40, turnClockWise);
+    this->spin(50, turnClockWise);
 
 }
