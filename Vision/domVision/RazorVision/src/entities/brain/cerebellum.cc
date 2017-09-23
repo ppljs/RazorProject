@@ -1,18 +1,28 @@
 #include <../include/entities/brain/cerebellum.hh>
 #include <../include/constants/captureconsts.h>
 
-//#include <pigpio.h>
+#include <pigpio.h>
 
-#define MAX_POWER_ALLOWED 7500
+#define MAX_POWER_ALLOWED 0.19125
 #define PWM_FREQ 1000
 
-#define PWM_RIGHT_MOTOR_FWR 12
-#define PWM_RIGHT_MOTOR_BCK 18
+#define PWM_RIGHT_MOTOR_FWR 5
+#define PWM_RIGHT_MOTOR_BCK 6
 
-#define PWM_LEFT_MOTOR_FWR 13
-#define PWM_LEFT_MOTOR_BCK 19
+#define PWM_LEFT_MOTOR_FWR 3
+#define PWM_LEFT_MOTOR_BCK 4
 
 Cerebellum::Cerebellum() {
+
+    gpioSetMode(PWM_RIGHT_MOTOR_FWR, PI_OUTPUT);
+    gpioSetMode(PWM_RIGHT_MOTOR_BCK, PI_OUTPUT);
+    gpioSetMode(PWM_LEFT_MOTOR_FWR, PI_OUTPUT);
+    gpioSetMode(PWM_LEFT_MOTOR_BCK, PI_OUTPUT);
+
+    gpioPWM(PWM_RIGHT_MOTOR_FWR, 0);
+    gpioPWM(PWM_RIGHT_MOTOR_BCK, 0);
+    gpioPWM(PWM_LEFT_MOTOR_FWR, 0);
+    gpioPWM(PWM_LEFT_MOTOR_BCK, 0);
 
 }
 
@@ -27,9 +37,12 @@ void Cerebellum::runFoward(int powerPercentage) {
         powerPercentage = 0;
     }
 
-    // duty cicle = powerPercentage * MbAX_POWER_ALLOWED
-//    gpioHardwarePWM(PWM_RIGHT_MOTOR_FWR, PWM_FREQ, powerPercentage*MAX_POWER_ALLOWED);
-//    gpioHardwarePWM(PWM_LEFT_MOTOR_FWR, PWM_FREQ, powerPercentage*MAX_POWER_ALLOWED);
+    gpioPWM(PWM_RIGHT_MOTOR_BCK, 0);
+    gpioPWM(PWM_LEFT_MOTOR_BCK, 0);
+
+    // duty cicle = powerPercentage * MAX_POWER_ALLOWED
+    gpioPWM(PWM_RIGHT_MOTOR_FWR, powerPercentage*MAX_POWER_ALLOWED);
+    gpioPWM(PWM_LEFT_MOTOR_FWR, powerPercentage*MAX_POWER_ALLOWED);
 
 }
 
@@ -42,11 +55,17 @@ void Cerebellum::spin(int powerPercentage, bool turnClockWise) {
 
     // duty cicle = powerPercentage * MAX_POWER_ALLOWED
     if(turnClockWise == true) {
-//        gpioHardwarePWM(PWM_RIGHT_MOTOR_BCK, PWM_FREQ, powerPercentage*MAX_POWER_ALLOWED);
-//        gpioHardwarePWM(PWM_LEFT_MOTOR_FWR, PWM_FREQ, powerPercentage*MAX_POWER_ALLOWED);
+        gpioPWM(PWM_RIGHT_MOTOR_FWR, 0);
+        gpioPWM(PWM_LEFT_MOTOR_BCK, 0);
+
+        gpioPWM(PWM_RIGHT_MOTOR_BCK, powerPercentage*MAX_POWER_ALLOWED);
+        gpioPWM(PWM_LEFT_MOTOR_FWR, powerPercentage*MAX_POWER_ALLOWED);
     } else {
-//        gpioHardwarePWM(PWM_RIGHT_MOTOR_FWR, PWM_FREQ, powerPercentage*MAX_POWER_ALLOWED);
-//        gpioHardwarePWM(PWM_LEFT_MOTOR_BCK, PWM_FREQ, powerPercentage*MAX_POWER_ALLOWED);
+        gpioPWM(PWM_RIGHT_MOTOR_BCK, 0);
+        gpioPWM(PWM_LEFT_MOTOR_FWR, 0);
+
+        gpioPWM(PWM_RIGHT_MOTOR_FWR, powerPercentage*MAX_POWER_ALLOWED);
+        gpioPWM(PWM_LEFT_MOTOR_BCK, powerPercentage*MAX_POWER_ALLOWED);
     }
 }
 
@@ -60,6 +79,6 @@ void Cerebellum::goTo(const MyPoint &target) {
         turnClockWise = false;
     }
 
-    this->spin(70, turnClockWise);
+    this->spin(25, turnClockWise);
 
 }
