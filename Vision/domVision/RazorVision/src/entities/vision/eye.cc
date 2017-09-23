@@ -66,7 +66,9 @@ void Eye::see(void) {
             cv::imshow("binImg2", _binImg2);
             cv::imshow("binImg3", _binImg3);
             cv::waitKey(32);
-        }        
+        }
+
+       cv::waitKey(20);
     }
 
 }

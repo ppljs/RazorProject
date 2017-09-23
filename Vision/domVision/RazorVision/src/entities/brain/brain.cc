@@ -27,15 +27,15 @@ void Brain::think() {
 
             if(abs(_target.posX-IMAGE_CENTER_X) > TARGET_AIM_RADIUS) {
                 _cerebellum.goTo(_target);
-//                std::cout << "GO_TO \n\n";
+                std::cout << "GO_TO \n\n";
             } else {
                 _cerebellum.runFoward(30);
-//                std::cout << "RUN_FOWARD \n\n";
+                std::cout << "RUN_FOWARD \n\n";
             }
 
         } else {
             _cerebellum.spin(30);
-//            std::cout << "SPIN \n\n";
+            std::cout << "SPIN \n\n";
         }
 
         usleep(50000);
