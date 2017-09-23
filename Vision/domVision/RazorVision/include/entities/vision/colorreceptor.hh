@@ -8,7 +8,7 @@ class ColorReceptor {
 
 public:
     ColorReceptor(char colorName[], int cvec[], bool displayImgs);
-    cv::Mat reception(cv::Mat hsv);
+    cv::Mat reception(cv::Mat& hsv);
 
 private:
     bool _displayImgs;

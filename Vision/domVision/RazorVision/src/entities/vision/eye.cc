@@ -2,10 +2,12 @@
 #include <../include/constants/captureconsts.h>
 
 #include <math.h>
+#include <stdio.h>
+#include <time.h>
 
-#define MAX_NUM_OBJECTS 50
-#define MIN_OBJECT_AREA 600
-#define MAX_OBJECT_AREA 1000000
+#define MAX_NUM_OBJECTS 30
+#define MIN_OBJECT_AREA 250
+#define MAX_OBJECT_AREA 500000
 #define PI              3.1415
 
 Eye::Eye(long loopTime, int camIndex, bool displayImgs) {
@@ -44,7 +46,12 @@ void Eye::see(void) {
     int y = 0;
     bool isKnown = false;
 
+    clock_t start, end;
+
     while(true) {
+
+        start = clock();
+
         _videoInput.read(_rawImg);
         cv::cvtColor(_rawImg, _hsv, cv::COLOR_BGR2HSV);
 
@@ -66,7 +73,11 @@ void Eye::see(void) {
             cv::imshow("binImg2", _binImg2);
             cv::imshow("binImg3", _binImg3);
             cv::waitKey(32);
-        }        
+        }
+
+        end = clock();
+
+        std::cout << "f = " << 1/(((double)(end - start))/1000000) << "\n\n";
     }
 
 }
@@ -78,8 +89,8 @@ void Eye::trackFilteredObject(int& x, int& y, bool& isKnown, cv::Mat& threshold,
     cv::findContours(threshold, _contours,_hierarchy,CV_RETR_CCOMP,CV_CHAIN_APPROX_SIMPLE );
     //use moments method to find our filtered object
     double refArea = 0;
+    double area;
     bool objectFound = false;
-
 
     if (_hierarchy.size() > 0) {
         cv::Moments moment;
@@ -89,7 +100,7 @@ void Eye::trackFilteredObject(int& x, int& y, bool& isKnown, cv::Mat& threshold,
             for (int index = 0; index >= 0; index = _hierarchy[index][0]) {
 
                 moment = cv::moments((cv::Mat)_contours[index]);
-                double area = moment.m00; 
+                area = moment.m00; 
 
 //                cv::Point extLeft  = *min_element(contours[index].begin(), contours[index].end(),
 //                                      [](const cv::Point& lhs, const cv::Point& rhs) {

@@ -7,7 +7,7 @@
 
 // When the target is inside the cicle there is no correction in trajectory
 // a high value means a smaller precision but less subtle changes on direction
-#define TARGET_AIM_RADIUS 60
+#define TARGET_AIM_RADIUS 120
 
 Brain::Brain(Eye *eye) {
     _eye = eye;
@@ -29,11 +29,11 @@ void Brain::think() {
                 _cerebellum.goTo(_target);
 //                std::cout << "GO_TO \n\n";
             } else {
-                _cerebellum.runFoward(30);
+                _cerebellum.runFoward(50);
 //                std::cout << "RUN_FOWARD \n\n";
             }
         } else {
-            _cerebellum.spin(30);
+            _cerebellum.spin(50);
 //            std::cout << "SPIN \n\n";
         }
 

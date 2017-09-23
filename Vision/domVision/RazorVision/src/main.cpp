@@ -2,7 +2,7 @@
 #include <../include/entities/vision/eye.hh>
 #include <../include/entities/brain/brain.hh>
 #include <thread>
-//#include <pigpio.h>
+#include <pigpio.h>
 
 #include <iostream>
 
@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
         displayImgs = (strncmp(argv[2], "true", 4)==0)? true : false;
     }
 
-    //gpioInitialise();
+    gpioInitialise();
 
     Eye eye(10, cam, displayImgs);
     Brain brain(&eye);
@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
     eyeThread.join();
     brainThread.join();
 
-    //gpioTerminate();
+    gpioTerminate();
 
     return 0;
 }
