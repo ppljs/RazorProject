@@ -4,8 +4,8 @@
 #include <math.h>
 
 #define MAX_NUM_OBJECTS 50
-#define MIN_OBJECT_AREA 600
-#define MAX_OBJECT_AREA 1000000
+#define MIN_OBJECT_AREA 300
+#define MAX_OBJECT_AREA 500000
 #define PI              3.1415
 
 Eye::Eye(long loopTime, int camIndex, bool displayImgs) {
@@ -136,9 +136,7 @@ void Eye::trackFilteredObject(int& x, int& y, bool& isKnown, cv::Mat& threshold,
                 if(objectFound ==true){
                     cv::putText(cameraFeed,"Tracking Object",cv::Point(0,50),2,1,cv::Scalar(0,255,0),2);
                     //draw object location on screen
-                    if(_displayImgs) {
-                        drawObject(x,y,cameraFeed);
-                    }
+                    drawObject(x,y,cameraFeed);
 
                 }else{
                     cv::putText(cameraFeed,"TOO MUCH NOISE! ADJUST FILTER",cv::Point(0,50),1,2,cv::Scalar(0,0,255),2);

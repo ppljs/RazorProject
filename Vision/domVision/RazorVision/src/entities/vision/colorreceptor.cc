@@ -12,7 +12,7 @@ ColorReceptor::ColorReceptor(char colorName[], int cvec[], bool displayImgs) {
     _V_MAX = cvec[5];
 
     strncpy(_colorName, colorName, 15);
-    if(displayImgs == true) {
+    if(_displayImgs == true) {
         createTrackbars();
     }
 
@@ -35,7 +35,7 @@ void ColorReceptor::on_trackbar( int, void* ) {
 }
 
 
-cv::Mat ColorReceptor::reception(cv::Mat hsv) {
+cv::Mat ColorReceptor::reception(cv::Mat &hsv) {
     cv::inRange(hsv, cv::Scalar(_H_MIN, _S_MIN, _V_MIN), cv::Scalar(_H_MAX, _S_MAX, _V_MAX), _threshold);
     morphOps(_threshold);
 
@@ -46,9 +46,9 @@ void ColorReceptor::morphOps(cv::Mat &thresh){
 
     //create structuring element that will be used to "dilate" and "erode" image.
     //the element chosen here is a 3px by 3px rectangle
-    cv::Mat erodeElement = cv::getStructuringElement( cv::MORPH_RECT,cv::Size(8,8));
+    cv::Mat erodeElement = cv::getStructuringElement( cv::MORPH_RECT,cv::Size(6,6));
     //dilate with larger element so make sure object is nicely visible
-    cv::Mat dilateElement = cv::getStructuringElement( cv::MORPH_RECT,cv::Size(10,10));
+    cv::Mat dilateElement = cv::getStructuringElement( cv::MORPH_RECT,cv::Size(12,12));
 
 //    cv::erode(thresh,thresh,erodeElement);
     cv::erode(thresh,thresh,erodeElement);
