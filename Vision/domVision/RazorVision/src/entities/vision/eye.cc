@@ -65,35 +65,30 @@ void Eye::see(void) {
             cv::imshow("binImg1", _binImg1);
             cv::imshow("binImg2", _binImg2);
             cv::imshow("binImg3", _binImg3);
-        }
-
-        cv::waitKey(32);
+            cv::waitKey(32);
+        }        
     }
 
 }
 
-void Eye::trackFilteredObject(int& x, int& y, bool& isKnown, cv::Mat threshold, cv::Mat &cameraFeed){
+void Eye::trackFilteredObject(int& x, int& y, bool& isKnown, cv::Mat& threshold, cv::Mat& cameraFeed){
 
-    cv::Mat temp;
-    threshold.copyTo(temp);
-    //these two vectors needed for output of findContours
-    std::vector< std::vector<cv::Point> > contours;
-    std::vector<cv::Vec4i> hierarchy;
+
     //find contours of filtered image using openCV findContours function
-    cv::findContours(temp,contours,hierarchy,CV_RETR_CCOMP,CV_CHAIN_APPROX_SIMPLE );
+    cv::findContours(threshold, _contours,_hierarchy,CV_RETR_CCOMP,CV_CHAIN_APPROX_SIMPLE );
     //use moments method to find our filtered object
     double refArea = 0;
     bool objectFound = false;
 
 
-    if (hierarchy.size() > 0) {
-
-        int numObjects = hierarchy.size();
+    if (_hierarchy.size() > 0) {
+        cv::Moments moment;
+        int numObjects = _hierarchy.size();
         //if number of objects greater than MAX_NUM_OBJECTS we have a noisy filter
         if(numObjects<MAX_NUM_OBJECTS){
-            for (int index = 0; index >= 0; index = hierarchy[index][0]) {
+            for (int index = 0; index >= 0; index = _hierarchy[index][0]) {
 
-                cv::Moments moment = cv::moments((cv::Mat)contours[index]);
+                moment = cv::moments((cv::Mat)_contours[index]);
                 double area = moment.m00; 
 
 //                cv::Point extLeft  = *min_element(contours[index].begin(), contours[index].end(),
@@ -134,14 +129,18 @@ void Eye::trackFilteredObject(int& x, int& y, bool& isKnown, cv::Mat threshold, 
                     std::cout << "RUIM - index = " << index << "\n\n";
                 }*/
             }
-            //let user know you found an object
-            if(objectFound ==true){
-                cv::putText(cameraFeed,"Tracking Object",cv::Point(0,50),2,1,cv::Scalar(0,255,0),2);
-                //draw object location on screen
-                drawObject(x,y,cameraFeed);
+            if(_displayImgs == true) {
+                //let user know you found an object
+                if(objectFound ==true){
+                    cv::putText(cameraFeed,"Tracking Object",cv::Point(0,50),2,1,cv::Scalar(0,255,0),2);
+                    //draw object location on screen
+                    if(_displayImgs) {
+                        drawObject(x,y,cameraFeed);
+                    }
 
-            }else{
-                cv::putText(cameraFeed,"TOO MUCH NOISE! ADJUST FILTER",cv::Point(0,50),1,2,cv::Scalar(0,0,255),2);
+                }else{
+                    cv::putText(cameraFeed,"TOO MUCH NOISE! ADJUST FILTER",cv::Point(0,50),1,2,cv::Scalar(0,0,255),2);
+                }
             }
         }
     }

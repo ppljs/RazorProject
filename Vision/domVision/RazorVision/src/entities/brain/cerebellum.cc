@@ -3,7 +3,7 @@
 
 #include <pigpio.h>
 
-#define MAX_POWER_ALLOWED 0.19125
+#define MAX_POWER_ALLOWED 1.9125
 #define PWM_FREQ 1000
 
 #define PWM_RIGHT_MOTOR_FWR 5
