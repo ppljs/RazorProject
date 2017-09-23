@@ -32,7 +32,6 @@ void Brain::think() {
                 _cerebellum.runFoward(30);
                 std::cout << "RUN_FOWARD \n\n";
             }
-
         } else {
             _cerebellum.spin(30);
             std::cout << "SPIN \n\n";
