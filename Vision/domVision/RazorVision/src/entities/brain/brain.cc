@@ -31,12 +31,12 @@ void Brain::think() {
                 _cerebellum.goTo(_target);
                 std::cout << "GO_TO \n\n";
             } else {
-                _cerebellum.runFoward(25);
+                _cerebellum.runFoward(40);
                 std::cout << "RUN_FOWARD \n\n";
             }
 
         } else {
-            _cerebellum.spin(25);
+            _cerebellum.spin(40);
             std::cout << "SPIN \n\n";
         }
 
