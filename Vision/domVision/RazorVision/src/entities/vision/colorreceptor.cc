@@ -50,9 +50,9 @@ void ColorReceptor::morphOps(cv::Mat &thresh){
     //dilate with larger element so make sure object is nicely visible
     cv::Mat dilateElement = cv::getStructuringElement( cv::MORPH_RECT,cv::Size(10,10));
 
-    cv::erode(thresh,thresh,erodeElement);
+//    cv::erode(thresh,thresh,erodeElement);
     cv::erode(thresh,thresh,erodeElement);
 
-    cv::dilate(thresh,thresh,dilateElement);
+//    cv::dilate(thresh,thresh,dilateElement);
     cv::dilate(thresh,thresh,dilateElement);
 }

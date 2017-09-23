@@ -38,6 +38,9 @@ private:
     cv::Mat _binImg1;
     cv::Mat _binImg2;
     cv::Mat _binImg3;
+    //these two vectors needed for output of findContours
+    std::vector< std::vector<cv::Point> > _contours;
+    std::vector<cv::Vec4i> _hierarchy;
 
     // Individual color catcher objects
     ColorReceptor *_receptors[3];
@@ -49,7 +52,7 @@ private:
     std::mutex _targetMutex;
 
     // Internal Functions (most for image processing)
-    void trackFilteredObject(int &x, int &y, bool &isKnown, cv::Mat threshold, cv::Mat &cameraFeed);
+    void trackFilteredObject(int& x, int& y, bool &isKnown, cv::Mat& threshold, cv::Mat& cameraFeed);
     void drawObject(int x, int y,cv::Mat &frame);
     std::string intToString(int number);
 
